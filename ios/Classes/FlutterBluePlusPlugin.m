@@ -138,7 +138,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [_centralManager connectPeripheral:peripheral options:nil];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"disconnect" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
@@ -147,7 +147,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [_centralManager cancelPeripheralConnection:peripheral];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"deviceState" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
@@ -155,7 +155,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       CBPeripheral *peripheral = [self findPeripheral:remoteId];
       result([self toFlutterData:[self toDeviceStateProto:peripheral state:peripheral.state]]);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"discoverServices" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
@@ -167,7 +167,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral discoverServices:nil];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"services" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
@@ -175,7 +175,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       CBPeripheral *peripheral = [self findPeripheral:remoteId];
       result([self toFlutterData:[self toServicesResultProto:peripheral]]);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"readCharacteristic" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [call arguments];
@@ -190,7 +190,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral readValueForCharacteristic:characteristic];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"readDescriptor" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [call arguments];
@@ -206,7 +206,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral readValueForDescriptor:descriptor];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"writeCharacteristic" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [call arguments];
@@ -223,7 +223,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral writeValue:[request value] forCharacteristic:characteristic type:type];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"writeDescriptor" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [call arguments];
@@ -240,7 +240,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral writeValue:[request value] forDescriptor:descriptor];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"setNotification" isEqualToString:call.method]) {
     FlutterStandardTypedData *data = [call arguments];
@@ -255,7 +255,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral setNotifyValue:[request enable] forCharacteristic:characteristic];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"mtu" isEqualToString:call.method]) {
     NSString *remoteId = [call arguments];
@@ -264,7 +264,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       uint32_t mtu = [self getMtu:peripheral];
       result([self toFlutterData:[self toMtuSizeResponseProto:peripheral mtu:mtu]]);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else if([@"requestMtu" isEqualToString:call.method]) {
     result([NSException exceptionWithName:@"requestMtu" reason:@"iOS does not allow mtu requests to the peripheral" userInfo:NULL]);
@@ -275,7 +275,7 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
       [peripheral readRSSI];
       result(nil);
     } @catch(NSException *e) {
-      result(e);
+      result([e reason]);
     }
   } else {
     result(FlutterMethodNotImplemented);
