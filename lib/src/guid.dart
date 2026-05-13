@@ -2,15 +2,15 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class Guid {
   final List<int> _bytes;
   final int _hashCode;
 
   Guid._internal(List<int> bytes)
-      : _bytes = bytes,
-        _hashCode = _calcHashCode(bytes);
+    : _bytes = bytes,
+      _hashCode = _calcHashCode(bytes);
 
   Guid(String input) : this._internal(_fromString(input));
 
@@ -41,13 +41,16 @@ class Guid {
   }
 
   static String _removeNonHexCharacters(String sourceString) {
-    return String.fromCharCodes(sourceString.runes.where((r) =>
+    return String.fromCharCodes(
+      sourceString.runes.where(
+        (r) =>
             (r >= 48 && r <= 57) // characters 0 to 9
             ||
             (r >= 65 && r <= 70) // characters A to F
             ||
-            (r >= 97 && r <= 102) // characters a to f
-        ));
+            (r >= 97 && r <= 102), // characters a to f
+      ),
+    );
   }
 
   static int _calcHashCode(List<int> bytes) {

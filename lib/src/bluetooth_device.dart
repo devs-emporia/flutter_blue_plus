@@ -2,7 +2,7 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class BluetoothDevice {
   final DeviceIdentifier id;
@@ -10,34 +10,34 @@ class BluetoothDevice {
   final BluetoothDeviceType type;
 
   BluetoothDevice.fromProto(protos.BluetoothDevice p)
-      : id = DeviceIdentifier(p.remoteId),
-        name = p.name,
-        type = BluetoothDeviceType.values[p.type.value];
+    : id = DeviceIdentifier(p.remoteId),
+      name = p.name,
+      type = BluetoothDeviceType.values[p.type.value];
 
   /// Use on Android when the MAC address is known.
   ///
   /// This constructor enables the Android to connect to a specific device
   /// as soon as it becomes available on the bluetooth "network".
   BluetoothDevice.fromId(String id, {String? name, BluetoothDeviceType? type})
-      : id = DeviceIdentifier(id),
-        name = name ?? "Unknown name",
-        type = type ?? BluetoothDeviceType.unknown;
+    : id = DeviceIdentifier(id),
+      name = name ?? "Unknown name",
+      type = type ?? BluetoothDeviceType.unknown;
 
-  final BehaviorSubject<bool> _isDiscoveringServices =
-      BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isDiscoveringServices = BehaviorSubject.seeded(
+    false,
+  );
   Stream<bool> get isDiscoveringServices => _isDiscoveringServices.stream;
 
   /// Establishes a connection to the Bluetooth Device.
-  Future<void> connect({
-    Duration? timeout,
-    bool autoConnect = true,
-  }) async {
+  Future<void> connect({Duration? timeout, bool autoConnect = true}) async {
     var request = protos.ConnectRequest.create()
       ..remoteId = id.toString()
       ..androidAutoConnect = autoConnect;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('connect', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'connect',
+      request.writeToBuffer(),
+    );
 
     if (timeout == null) {
       await state.firstWhere((s) => s == BluetoothDeviceState.connected);
@@ -45,20 +45,22 @@ class BluetoothDevice {
       await state
           .firstWhere((s) => s == BluetoothDeviceState.connected)
           .timeout(
-        timeout,
-        onTimeout: () {
-          disconnect();
-          throw TimeoutException('Failed to connect in time.', timeout);
-        },
-      );
+            timeout,
+            onTimeout: () {
+              disconnect();
+              throw TimeoutException('Failed to connect in time.', timeout);
+            },
+          );
     }
   }
 
   /// Send a pairing request to the device.
   /// Currently only implemented on Android.
   Future<void> pair() async {
-    return FlutterBluePlus.instance._channel
-        .invokeMethod('pair', id.toString());
+    return FlutterBluePlus.instance._channel.invokeMethod(
+      'pair',
+      id.toString(),
+    );
   }
 
   /// Refresh Gatt Device Cache
@@ -66,14 +68,18 @@ class BluetoothDevice {
   /// Currently only implemented on Android.
   Future<void> clearGattCache() async {
     if (Platform.isAndroid) {
-      return FlutterBluePlus.instance._channel
-          .invokeMethod('clearGattCache', id.toString());
+      return FlutterBluePlus.instance._channel.invokeMethod(
+        'clearGattCache',
+        id.toString(),
+      );
     }
   }
 
   /// Cancels connection to the Bluetooth Device
-  Future disconnect() => FlutterBluePlus.instance._channel
-      .invokeMethod('disconnect', id.toString());
+  Future disconnect() => FlutterBluePlus.instance._channel.invokeMethod(
+    'disconnect',
+    id.toString(),
+  );
 
   final BehaviorSubject<List<BluetoothService>> _services =
       BehaviorSubject.seeded([]);
@@ -82,8 +88,11 @@ class BluetoothDevice {
   Future<List<BluetoothService>> discoverServices() async {
     final s = await state.first;
     if (s != BluetoothDeviceState.connected) {
-      return Future.error(Exception(
-          'Cannot discoverServices while device is not connected. State == $s'));
+      return Future.error(
+        Exception(
+          'Cannot discoverServices while device is not connected. State == $s',
+        ),
+      );
     }
     var response = FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "DiscoverServicesResult")
@@ -94,13 +103,15 @@ class BluetoothDevice {
         .map((s) => s.map((p) => BluetoothService.fromProto(p)).toList())
         .first
         .then((list) {
-      _services.add(list);
-      _isDiscoveringServices.add(false);
-      return list;
-    });
+          _services.add(list);
+          _isDiscoveringServices.add(false);
+          return list;
+        });
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('discoverServices', id.toString());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'discoverServices',
+      id.toString(),
+    );
 
     _isDiscoveringServices.add(true);
 
@@ -112,8 +123,9 @@ class BluetoothDevice {
   Stream<List<BluetoothService>> get services async* {
     yield await FlutterBluePlus.instance._channel
         .invokeMethod('services', id.toString())
-        .then((buffer) =>
-            protos.DiscoverServicesResult.fromBuffer(buffer).services)
+        .then(
+          (buffer) => protos.DiscoverServicesResult.fromBuffer(buffer).services,
+        )
         .then((i) => i.map((s) => BluetoothService.fromProto(s)).toList());
     yield* _services.stream;
   }
@@ -165,8 +177,10 @@ class BluetoothDevice {
         .map((p) => p.mtu)
         .first;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('requestMtu', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'requestMtu',
+      request.writeToBuffer(),
+    );
 
     return response;
   }
@@ -187,8 +201,8 @@ class BluetoothDevice {
         .where((p) => (p.remoteId == remoteId))
         .first
         .then((c) {
-      return (c.rssi);
-    });
+          return (c.rssi);
+        });
   }
 
   @override
