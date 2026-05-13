@@ -2,7 +2,7 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class BluetoothDescriptor {
   static final Guid cccd = Guid("00002902-0000-1000-8000-00805f9b34fb");
@@ -18,11 +18,11 @@ class BluetoothDescriptor {
   List<int> get lastValue => _value.value;
 
   BluetoothDescriptor.fromProto(protos.BluetoothDescriptor p)
-      : uuid = Guid(p.uuid),
-        deviceId = DeviceIdentifier(p.remoteId),
-        serviceUuid = Guid(p.serviceUuid),
-        characteristicUuid = Guid(p.characteristicUuid),
-        _value = BehaviorSubject.seeded(p.value);
+    : uuid = Guid(p.uuid),
+      deviceId = DeviceIdentifier(p.remoteId),
+      serviceUuid = Guid(p.serviceUuid),
+      characteristicUuid = Guid(p.characteristicUuid),
+      _value = BehaviorSubject.seeded(p.value);
 
   /// Retrieves the value of a specified descriptor
   Future<List<int>> read() async {
@@ -32,24 +32,28 @@ class BluetoothDescriptor {
       ..characteristicUuid = characteristicUuid.toString()
       ..serviceUuid = serviceUuid.toString();
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('readDescriptor', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'readDescriptor',
+      request.writeToBuffer(),
+    );
 
     return FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "ReadDescriptorResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.ReadDescriptorResponse.fromBuffer(buffer))
-        .where((p) =>
-            (p.request.remoteId == request.remoteId) &&
-            (p.request.descriptorUuid == request.descriptorUuid) &&
-            (p.request.characteristicUuid == request.characteristicUuid) &&
-            (p.request.serviceUuid == request.serviceUuid))
+        .where(
+          (p) =>
+              (p.request.remoteId == request.remoteId) &&
+              (p.request.descriptorUuid == request.descriptorUuid) &&
+              (p.request.characteristicUuid == request.characteristicUuid) &&
+              (p.request.serviceUuid == request.serviceUuid),
+        )
         .map((d) => d.value)
         .first
         .then((d) {
-      _value.add(d);
-      return d;
-    });
+          _value.add(d);
+          return d;
+        });
   }
 
   /// Writes the value of a descriptor
@@ -61,23 +65,29 @@ class BluetoothDescriptor {
       ..serviceUuid = serviceUuid.toString()
       ..value = value;
 
-    await FlutterBluePlus.instance._channel
-        .invokeMethod('writeDescriptor', request.writeToBuffer());
+    await FlutterBluePlus.instance._channel.invokeMethod(
+      'writeDescriptor',
+      request.writeToBuffer(),
+    );
 
     return FlutterBluePlus.instance._methodStream
         .where((m) => m.method == "WriteDescriptorResponse")
         .map((m) => m.arguments)
         .map((buffer) => protos.WriteDescriptorResponse.fromBuffer(buffer))
-        .where((p) =>
-            (p.request.remoteId == request.remoteId) &&
-            (p.request.descriptorUuid == request.descriptorUuid) &&
-            (p.request.characteristicUuid == request.characteristicUuid) &&
-            (p.request.serviceUuid == request.serviceUuid))
+        .where(
+          (p) =>
+              (p.request.remoteId == request.remoteId) &&
+              (p.request.descriptorUuid == request.descriptorUuid) &&
+              (p.request.characteristicUuid == request.characteristicUuid) &&
+              (p.request.serviceUuid == request.serviceUuid),
+        )
         .first
         .then((w) => w.success)
-        .then((success) => (!success)
-            ? throw Exception('Failed to write the descriptor')
-            : null)
+        .then(
+          (success) => (!success)
+              ? throw Exception('Failed to write the descriptor')
+              : null,
+        )
         .then((_) => _value.add(value))
         .then((_) => null);
   }

@@ -2,13 +2,15 @@
 // All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-part of flutter_blue_plus;
+part of '../flutter_blue_plus.dart';
 
 class FlutterBluePlus {
-  final MethodChannel _channel =
-      const MethodChannel('flutter_blue_plus/methods');
-  final EventChannel _stateChannel =
-      const EventChannel('flutter_blue_plus/state');
+  final MethodChannel _channel = const MethodChannel(
+    'flutter_blue_plus/methods',
+  );
+  final EventChannel _stateChannel = const EventChannel(
+    'flutter_blue_plus/state',
+  );
   final StreamController<MethodCall> _methodStreamController =
       StreamController.broadcast(); // ignore: close_sinks
   Stream<MethodCall> get _methodStream => _methodStreamController
@@ -72,8 +74,9 @@ class FlutterBluePlus {
   final BehaviorSubject<bool> _isScanning = BehaviorSubject.seeded(false);
   Stream<bool> get isScanning => _isScanning.stream;
 
-  final BehaviorSubject<List<ScanResult>> _scanResults =
-      BehaviorSubject.seeded([]);
+  final BehaviorSubject<List<ScanResult>> _scanResults = BehaviorSubject.seeded(
+    [],
+  );
 
   /// Returns a stream that is a list of [ScanResult] results while a scan is in progress.
   ///
@@ -174,17 +177,17 @@ class FlutterBluePlus {
         .doOnDone(stopScan)
         .map((buffer) => protos.ScanResult.fromBuffer(buffer))
         .map((p) {
-      final result = ScanResult.fromProto(p);
-      final list = _scanResults.value;
-      int index = list.indexOf(result);
-      if (index != -1) {
-        list[index] = result;
-      } else {
-        list.add(result);
-      }
-      _scanResults.add(list);
-      return result;
-    });
+          final result = ScanResult.fromProto(p);
+          final list = _scanResults.value;
+          int index = list.indexOf(result);
+          if (index != -1) {
+            list[index] = result;
+          } else {
+            list.add(result);
+          }
+          _scanResults.add(list);
+          return result;
+        });
   }
 
   /// Starts a scan and returns a future that will complete once the scan has finished.
@@ -204,13 +207,13 @@ class FlutterBluePlus {
     bool allowDuplicates = false,
   }) async {
     await scan(
-            scanMode: scanMode,
-            withServices: withServices,
-            withDevices: withDevices,
-            macAddresses: macAddresses,
-            timeout: timeout,
-            allowDuplicates: allowDuplicates)
-        .drain();
+      scanMode: scanMode,
+      withServices: withServices,
+      withDevices: withDevices,
+      macAddresses: macAddresses,
+      timeout: timeout,
+      allowDuplicates: allowDuplicates,
+    ).drain();
     return _scanResults.value;
   }
 
@@ -224,10 +227,10 @@ class FlutterBluePlus {
   /// The list of connected peripherals can include those that are connected
   /// by other apps and that will need to be connected locally using the
   /// device.connect() method before they can be used.
-//  Stream<List<BluetoothDevice>> connectedDevices({
-//    List<Guid> withServices = const [],
-//  }) =>
-//      throw UnimplementedError();
+  //  Stream<List<BluetoothDevice>> connectedDevices({
+  //    List<Guid> withServices = const [],
+  //  }) =>
+  //      throw UnimplementedError();
 
   /// Sets the log level of the FlutterBlue instance
   /// Messages equal or below the log level specified are stored/forwarded,
@@ -266,7 +269,7 @@ enum BluetoothState {
   turningOn,
   on,
   turningOff,
-  off
+  off,
 }
 
 class ScanMode {
@@ -295,10 +298,10 @@ class DeviceIdentifier {
 
 class ScanResult {
   ScanResult.fromProto(protos.ScanResult p)
-      : device = BluetoothDevice.fromProto(p.device),
-        advertisementData = AdvertisementData.fromProto(p.advertisementData),
-        rssi = p.rssi,
-        timeStamp = DateTime.now();
+    : device = BluetoothDevice.fromProto(p.device),
+      advertisementData = AdvertisementData.fromProto(p.advertisementData),
+      rssi = p.rssi,
+      timeStamp = DateTime.now();
 
   final BluetoothDevice device;
   final AdvertisementData advertisementData;
@@ -330,13 +333,12 @@ class AdvertisementData {
   final List<String> serviceUuids;
 
   AdvertisementData.fromProto(protos.AdvertisementData p)
-      : localName = p.localName,
-        txPowerLevel =
-            (p.txPowerLevel.hasValue()) ? p.txPowerLevel.value : null,
-        connectable = p.connectable,
-        manufacturerData = p.manufacturerData,
-        serviceData = p.serviceData,
-        serviceUuids = p.serviceUuids;
+    : localName = p.localName,
+      txPowerLevel = (p.txPowerLevel.hasValue()) ? p.txPowerLevel.value : null,
+      connectable = p.connectable,
+      manufacturerData = p.manufacturerData,
+      serviceData = p.serviceData,
+      serviceUuids = p.serviceUuids;
 
   @override
   String toString() {
